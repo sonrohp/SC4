@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Products Menu</title>
+  <!-- Simplified dependencies - just Tailwind and basic React -->
+  <script src="https://unpkg.com/react@17/umd/react.production.min.js"></script>
+  <script src="https://unpkg.com/react-dom@17/umd/react-dom.production.min.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+</head>
+<body>
+  <!-- Main content container -->
+  <div id="root" class="min-h-screen bg-gray-100 p-4 flex justify-center items-start pt-16"></div>
+
+  <!-- App code -->
+  <script type="text/babel">
+    function App() {
+      const [isOpen, setIsOpen] = React.useState(false);
+      const [expanded, setExpanded] = React.useState({
+        WC: false,
+        WCP: false,
+        Textura: false
+      });
+      
+      // Toggle the main dropdown
+      const toggleMenu = () => setIsOpen(!isOpen);
+      
+      // Toggle a specific category
+      const toggleCategory = (category) => {
+        setExpanded({
+          ...expanded,
+          [category]: !expanded[category]
+        });
+      };
+      
+      // Product data
+      const products = {
+        WC: ['1kg', '5kg', '25kg', 'PPI 40kg', 'Paper 50kg'],
+        WCP: ['Putty Fine 1kg', 'Putty Fine 5kg', 'Putty Fine 10kg', 'Putty Fine 20kg Safepack', 'Putty Fine 20kg Safepack (with token)'],
+        Textura: ['White TF 20kg', 'White RF 20kg', 'White TF 25kg', 'White RF 25kg']
+      };
+      
+      return (
+        <div className="w-full max-w-md">
+          {/* Main dropdown button */}
+          <div className="bg-white rounded shadow">
+            <button 
+              className="w-full px-4 py-3 flex items-center justify-between border-b text-gray-800"
+              onClick={toggleMenu}
+            >
+              <span className="font-medium">Products</span>
+              <svg 
+                className={`w-4 h-4 transform transition-transform ${isOpen ? 'rotate-90' : ''}`} 
+                fill="none" 
+                stroke="currentColor" 
+                viewBox="0 0 24 24"
+              >
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7" />
+              </svg>
+            </button>
+            
+            {/* Dropdown content */}
+            {isOpen && (
+              <div className="p-3">
+                {Object.keys(products).map((category) => (
+                  <div key={category} className="mb-2">
+                    {/* Category header */}
+                    <div 
+                      className="flex items-center py-1 cursor-pointer" 
+                      onClick={() => toggleCategory(category)}
+                    >
+                      <svg 
+                        className={`w-4 h-4 mr-2 transform transition-transform ${expanded[category] ? 'rotate-90' : ''}`} 
+                        fill="none" 
+                        stroke="currentColor" 
+                        viewBox="0 0 24 24"
+                      >
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7" />
+                      </svg>
+                      <span className="font-medium">{category}</span>
+                    </div>
+                    
+                    {/* Category items */}
+                    {expanded[category] && (
+                      <div className="ml-6 mt-1">
+                        {products[category].map((item, idx) => (
+                          <div key={idx} className="flex items-center py-1">
+                            <input type="checkbox" id={`${category}-${idx}`} className="mr-2" />
+                            <label htmlFor={`${category}-${idx}`} className="text-sm">
+                              {item}
+                            </label>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                    
+                    <div className="border-b my-2"></div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+      );
+    }
+    
+    // Render the app
+    ReactDOM.render(<App />, document.getElementById('root'));
+  </script>
+</body>
+</html>
