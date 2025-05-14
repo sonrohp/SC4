@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Products Menu</title>
-  <!-- Simplified dependencies - just Tailwind and basic React -->
+  <title>Products & Regions Filter</title>
+  <!-- Simple dependencies from CDN -->
   <script src="https://unpkg.com/react@17/umd/react.production.min.js"></script>
   <script src="https://unpkg.com/react-dom@17/umd/react-dom.production.min.js"></script>
   <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
@@ -12,11 +12,22 @@
 </head>
 <body>
   <!-- Main content container -->
-  <div id="root" class="min-h-screen bg-gray-100 p-4 flex justify-center items-start pt-16"></div>
+  <div id="root" class="min-h-screen bg-gray-100 p-4 flex flex-col items-center pt-8 space-y-6"></div>
 
   <!-- App code -->
   <script type="text/babel">
+    // Main App component that will contain both sub-components
     function App() {
+      return (
+        <div className="w-full max-w-md space-y-6">
+          <ProductsDropdown />
+          <RegionsFilter />
+        </div>
+      );
+    }
+    
+    // Products Dropdown Component (from previous implementation)
+    function ProductsDropdown() {
       const [isOpen, setIsOpen] = React.useState(false);
       const [expanded, setExpanded] = React.useState({
         WC: false,
@@ -43,16 +54,130 @@
       };
       
       return (
-        <div className="w-full max-w-md">
-          {/* Main dropdown button */}
+        <div className="bg-white rounded shadow">
+          <button 
+            className="w-full px-4 py-3 flex items-center justify-between border-b text-gray-800"
+            onClick={toggleMenu}
+          >
+            <span className="font-medium">Products</span>
+            <svg 
+              className={`w-4 h-4 transform transition-transform ${isOpen ? 'rotate-90' : ''}`} 
+              fill="none" 
+              stroke="currentColor" 
+              viewBox="0 0 24 24"
+            >
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7" />
+            </svg>
+          </button>
+          
+          {/* Dropdown content */}
+          {isOpen && (
+            <div className="p-3">
+              {Object.keys(products).map((category) => (
+                <div key={category} className="mb-2">
+                  {/* Category header */}
+                  <div 
+                    className="flex items-center py-1 cursor-pointer" 
+                    onClick={() => toggleCategory(category)}
+                  >
+                    <svg 
+                      className={`w-4 h-4 mr-2 transform transition-transform ${expanded[category] ? 'rotate-90' : ''}`} 
+                      fill="none" 
+                      stroke="currentColor" 
+                      viewBox="0 0 24 24"
+                    >
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7" />
+                    </svg>
+                    <span className="font-medium">{category}</span>
+                  </div>
+                  
+                  {/* Category items */}
+                  {expanded[category] && (
+                    <div className="ml-6 mt-1">
+                      {products[category].map((item, idx) => (
+                        <div key={idx} className="flex items-center py-1">
+                          <input type="checkbox" id={`${category}-${idx}`} className="mr-2" />
+                          <label htmlFor={`${category}-${idx}`} className="text-sm">
+                            {item}
+                          </label>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                  
+                  <div className="border-b my-2"></div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      );
+    }
+    
+    // New Regions Filter Component
+    function RegionsFilter() {
+      // Define state
+      const [logicalStateOpen, setLogicalStateOpen] = React.useState(false);
+      const [areasOpen, setAreasOpen] = React.useState(false);
+      const [selectedStates, setSelectedStates] = React.useState({
+        "MP East": true, 
+        "MP West": false, 
+        "UP Central": true, 
+        "UP Eastern": false, 
+        "UP Western": false, 
+        "Uttarakhand": false
+      });
+      
+      // Define the logical states and their associated areas
+      const regionData = {
+        "MP East": ["A", "B", "C", "D"],
+        "MP West": ["E", "F", "G", "H"],
+        "UP Central": ["I", "J", "K", "L"],
+        "UP Eastern": ["M", "N", "O", "P"],
+        "UP Western": ["Q", "R", "S", "T"],
+        "Uttarakhand": ["U", "V", "W", "X"]
+      };
+      
+      // Toggle dropdowns
+      const toggleLogicalState = () => setLogicalStateOpen(!logicalStateOpen);
+      const toggleAreas = () => setAreasOpen(!areasOpen);
+      
+      // Handle checkbox changes
+      const handleStateChange = (state) => {
+        setSelectedStates({
+          ...selectedStates,
+          [state]: !selectedStates[state]
+        });
+      };
+      
+      // Get list of selected states for display
+      const getSelectedStatesList = () => {
+        const states = Object.keys(selectedStates).filter(state => selectedStates[state]);
+        return states.length ? states.join(", ") : "Select logical state";
+      };
+      
+      // Get all areas for selected states
+      const getVisibleAreas = () => {
+        const areas = [];
+        Object.keys(selectedStates).forEach(state => {
+          if (selectedStates[state]) {
+            areas.push(...regionData[state].map(area => ({ state, area })));
+          }
+        });
+        return areas;
+      };
+      
+      return (
+        <div className="space-y-3">
+          {/* Logical State Dropdown */}
           <div className="bg-white rounded shadow">
             <button 
               className="w-full px-4 py-3 flex items-center justify-between border-b text-gray-800"
-              onClick={toggleMenu}
+              onClick={toggleLogicalState}
             >
-              <span className="font-medium">Products</span>
+              <span className="font-medium">Logical State: <span className="font-normal text-gray-600">{getSelectedStatesList()}</span></span>
               <svg 
-                className={`w-4 h-4 transform transition-transform ${isOpen ? 'rotate-90' : ''}`} 
+                className={`w-4 h-4 transform transition-transform ${logicalStateOpen ? 'rotate-90' : ''}`} 
                 fill="none" 
                 stroke="currentColor" 
                 viewBox="0 0 24 24"
@@ -61,44 +186,76 @@
               </svg>
             </button>
             
-            {/* Dropdown content */}
-            {isOpen && (
+            {/* Logical State Dropdown Content */}
+            {logicalStateOpen && (
               <div className="p-3">
-                {Object.keys(products).map((category) => (
-                  <div key={category} className="mb-2">
-                    {/* Category header */}
-                    <div 
-                      className="flex items-center py-1 cursor-pointer" 
-                      onClick={() => toggleCategory(category)}
-                    >
-                      <svg 
-                        className={`w-4 h-4 mr-2 transform transition-transform ${expanded[category] ? 'rotate-90' : ''}`} 
-                        fill="none" 
-                        stroke="currentColor" 
-                        viewBox="0 0 24 24"
-                      >
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7" />
-                      </svg>
-                      <span className="font-medium">{category}</span>
-                    </div>
-                    
-                    {/* Category items */}
-                    {expanded[category] && (
-                      <div className="ml-6 mt-1">
-                        {products[category].map((item, idx) => (
-                          <div key={idx} className="flex items-center py-1">
-                            <input type="checkbox" id={`${category}-${idx}`} className="mr-2" />
-                            <label htmlFor={`${category}-${idx}`} className="text-sm">
-                              {item}
-                            </label>
-                          </div>
-                        ))}
-                      </div>
-                    )}
-                    
-                    <div className="border-b my-2"></div>
+                {Object.keys(regionData).map((state) => (
+                  <div key={state} className="flex items-center py-1">
+                    <input 
+                      type="checkbox" 
+                      id={`state-${state}`} 
+                      checked={selectedStates[state] || false}
+                      onChange={() => handleStateChange(state)}
+                      className="mr-2" 
+                    />
+                    <label htmlFor={`state-${state}`} className="text-sm">
+                      {state}
+                    </label>
                   </div>
                 ))}
+              </div>
+            )}
+          </div>
+          
+          {/* Areas Dropdown */}
+          <div className="bg-white rounded shadow">
+            <button 
+              className="w-full px-4 py-3 flex items-center justify-between border-b text-gray-800"
+              onClick={toggleAreas}
+            >
+              <span className="font-medium">Areas</span>
+              <svg 
+                className={`w-4 h-4 transform transition-transform ${areasOpen ? 'rotate-90' : ''}`} 
+                fill="none" 
+                stroke="currentColor" 
+                viewBox="0 0 24 24"
+              >
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7" />
+              </svg>
+            </button>
+            
+            {/* Areas Dropdown Content */}
+            {areasOpen && (
+              <div className="p-3">
+                {getVisibleAreas().length > 0 ? (
+                  <div className="space-y-4">
+                    {/* Group areas by their parent logical state */}
+                    {Object.keys(selectedStates)
+                      .filter(state => selectedStates[state])
+                      .map(state => (
+                        <div key={state} className="mb-2">
+                          <div className="font-medium text-sm text-gray-700 mb-1">{state}</div>
+                          <div className="ml-4 space-y-1">
+                            {regionData[state].map(area => (
+                              <div key={area} className="flex items-center py-1">
+                                <input 
+                                  type="checkbox" 
+                                  id={`area-${area}`} 
+                                  className="mr-2" 
+                                />
+                                <label htmlFor={`area-${area}`} className="text-sm">
+                                  {area}
+                                </label>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      ))
+                    }
+                  </div>
+                ) : (
+                  <div className="text-sm text-gray-500 py-2">Please select a logical state first</div>
+                )}
               </div>
             )}
           </div>
